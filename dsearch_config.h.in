@@ -1,0 +1,4 @@
+#ifndef DSEARCH_CONFIG_H
+#define DSEARCH_CONFIG_H
+#cmakedefine DSEARCH_VERSION "@DSEARCH_VERSION@"
+#endif

@@ -1,0 +1,3 @@
+[submodule "deps/mingw-copylibs"]
+	path = deps/mingw-copylibs
+	url = https://github.com/Denzy7/mingw-copylibs

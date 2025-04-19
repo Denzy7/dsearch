@@ -1,0 +1,7 @@
+.cache
+*.log
+*.vim
+*.out
+build/*
+*.user*
+venv
