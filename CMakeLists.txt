@@ -75,18 +75,38 @@ install(TARGETS dsearch
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/dsearch-${DSEARCH_VERSION}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/dsearch-${DSEARCH_VERSION}
 )
+install(FILES qt.conf 
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/dsearch-${DSEARCH_VERSION})
 
 if(MINGW)
     mingw_copylibs_install(${CMAKE_INSTALL_BINDIR}/dsearch-${DSEARCH_VERSION}/dsearch.exe)
+    if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+        set(pluginsdir
+            lib/qt6/plugins
+            share/qt6/plugins
+        )
+    else()
+        set(pluginsdir 
+            lib/qt5/plugins
+            share/qt5/plugins
+            lib/qt/plugins
+            share/qt/plugins
+        )
+    endif()
     foreach(pfx ${CMAKE_SYSTEM_PREFIX_PATH})
         # assumes we have winpthread, may not be case but it's always there
         if(EXISTS "${pfx}/bin/libwinpthread-1.dll")
-            install(DIRECTORY 
-                ${pfx}/lib/qt/plugins/platforms
-                ${pfx}/lib/qt/plugins/styles
 
-                DESTINATION ${CMAKE_INSTALL_BINDIR}/dsearch-${DSEARCH_VERSION}/lib/qt/plugins
-            )
+
+            foreach(plugindir ${pluginsdir})
+                if(EXISTS "${pfx}/${plugindir}")
+                    install(DIRECTORY 
+                        ${pfx}/${plugindir}/platforms
+                        ${pfx}/${plugindir}/styles
+                        DESTINATION ${CMAKE_INSTALL_LIBDIR}/qt_plugins
+                    )
+                endif()
+            endforeach()
         endif()
     endforeach()
 endif()
