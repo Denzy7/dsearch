@@ -51,14 +51,13 @@ jobs:
 
       - name: ${{ matrix.name }} config, build and install
         run: |
-          cd frontend_qt/patientmgr_qt
           cmake -S . -B build/${{ matrix.name }}
           cmake --build build/${{ matrix.name }} -j$(nproc)
           cmake --install build/${{ matrix.name }} --prefix out-${{ matrix.name }}
 
       - name: ${{ matrix.name }} zip
         run: |
-          zip -r ${{ matrix.name }}.zip frontend_qt/patientmgr_qt/out-${{ matrix.name }}/
+          zip -r ${{ matrix.name }}.zip out-${{ matrix.name }}/
 
       - name: ${{ matrix.name }} build
         uses: actions/upload-artifact@v4
