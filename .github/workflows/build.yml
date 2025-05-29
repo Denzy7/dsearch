@@ -1,0 +1,90 @@
+name: build and release qt windows and linux
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: windows-2019
+            shell: msys2
+            name: "x86_64_windows"
+          - os: ubuntu-22.04
+            shell: bash
+            name: "x86_64_linux"
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: ${{ matrix.shell}} {0}
+
+    steps:
+      - name: linux setup and dependencies
+        if: matrix.name == 'x86_64_linux'
+        run: |
+          sudo apt update
+          sudo apt -y install qtbase5-dev pkgconf 
+
+      - name: msys2 setup
+        uses: msys2/setup-msys2@v2
+        if: matrix.name == 'x86_64_windows'
+        with:
+          msystem: UCRT64
+          update: true
+          pacboy: gcc cmake qt5-base
+          install: git zip
+
+      - name: fix crlf
+        run: git config --global core.autocrlf input
+
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: ${{ matrix.name }} config, build and install
+        run: |
+          cd frontend_qt/patientmgr_qt
+          cmake -S . -B build/${{ matrix.name }}
+          cmake --build build/${{ matrix.name }} -j$(nproc)
+          cmake --install build/${{ matrix.name }} --prefix out-${{ matrix.name }}
+
+      - name: ${{ matrix.name }} zip
+        run: |
+          zip -r ${{ matrix.name }}.zip frontend_qt/patientmgr_qt/out-${{ matrix.name }}/
+
+      - name: ${{ matrix.name }} build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}_build
+          path: ${{ matrix.name }}.zip
+
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: rel
+
+      - name: release files list
+        run: |
+          ls rel/**
+
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            rel/**

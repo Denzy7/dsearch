@@ -346,10 +346,30 @@ void MainWindow::onRMBtblFiles_HorizHdr(const QPoint& pont)
     QMenu contextMenu("HorizHdr Menu", this);
 
     QMenu* fit = contextMenu.addMenu("Resize Columns Fit");
-    fit->addAction("Interactive");
-    fit->addAction("Stretch");
-    fit->addAction("Fixed");
-    fit->addAction("Resize Contents");
+
+    struct ResizeOpts
+    {
+        const char* name;
+        QHeaderView::ResizeMode mode;
+    };
+    ResizeOpts opts[] = 
+    {
+        {"Interactive", QHeaderView::Interactive},
+        {"Stretch", QHeaderView::Stretch},
+        {"Fixed", QHeaderView::Fixed},
+        {"Resize to Contents", QHeaderView::ResizeToContents},
+    };
+
+    for(ResizeOpts opt : opts)
+    {
+        QAction* act = fit->addAction(opt.name);
+        connect(act, &QAction::triggered,
+                [this, opt]()
+                {
+                this->ui->tblFiles->horizontalHeader()->resizeSections(opt.mode);
+                }
+               );
+    }
 
     contextMenu.exec(mapToGlobal(pont));
 

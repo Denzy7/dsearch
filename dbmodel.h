@@ -11,6 +11,13 @@ namespace DSearch {
 class DbModel : QStandardItemModel
 {
     public:
+        QString colums[4] = 
+        {
+            "File",
+            "Last Modified",
+            "Size",
+            "Path"
+        };
 
         QSortFilterProxyModel proxymodel;
 
