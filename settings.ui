@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>407</width>
-        <height>465</height>
+        <width>408</width>
+        <height>487</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -38,7 +38,7 @@
           <item>
            <widget class="QListView" name="lstPaths">
             <property name="selectionMode">
-             <enum>QAbstractItemView::MultiSelection</enum>
+             <enum>QAbstractItemView::SelectionMode::MultiSelection</enum>
             </property>
            </widget>
           </item>
@@ -78,8 +78,14 @@
           </item>
           <item>
            <widget class="QCheckBox" name="chkFileWatcher">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Enable</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -112,7 +118,7 @@
              <string>Size Unit</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -127,7 +133,7 @@
          <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>

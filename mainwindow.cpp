@@ -80,6 +80,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::indexone(DSearch::Indexer* indexer, DSearch::Db* db, DSearch::DbEntry* entry)
 {
+    if(stopupdaterequested){
+        indexer->Stop();
+        stopupdaterequested = 0;
+        return;
+    }
     ui->statusbar->showMessage(entry->path);
     dbmodel.AddEntryToModel(*entry);
 
@@ -106,9 +111,11 @@ void MainWindow::indexall(DSearch::Indexer* indexer, DSearch::Db* db)
         fswatcher.addPath(*it_qs);
     }
     ui->statusbar->clearMessage();
+    ui->actionStop_Update->setEnabled(false);
+    ui->actionUpdate_Database->setEnabled(true);
 
     items_statusbar->setText(QString("Files: %1").arg(ents->size()));
-
+    m_mainindexer.Stop();
 }
 
 void MainWindow::onDirectoryChanged(const QString &path)
@@ -170,9 +177,7 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionStop_Update_triggered()
 {
-    m_mainindexer.Stop();
-    ui->actionStop_Update->setEnabled(false);
-    ui->actionUpdate_Database->setEnabled(true);
+    stopupdaterequested = 1;
 }
 
 void MainWindow::on_actionExit_triggered()

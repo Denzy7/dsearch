@@ -71,6 +71,7 @@ private:
 
     SearchOptions searchopts;
     DSearch::DbEntry getMappedSelectedEntry();
+    int stopupdaterequested = 0;
 
 public slots:
     void indexone(DSearch::Indexer* indexer, DSearch::Db* db, DSearch::DbEntry* entry);

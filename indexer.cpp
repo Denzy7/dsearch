@@ -38,8 +38,10 @@ public slots:
             DSearch::DbEntry ref;
             while(it_qdir.hasNext())
             {
-                if(me->isInterruptionRequested())
+                if(me->isInterruptionRequested()){
+                    emit IndexFinished(m_indexer, m_db);
                     return;
+                }
 
                 if(m_db->Add(it_qdir.next(), &ref))
                 {
@@ -93,14 +95,14 @@ void Indexer::Stop()
     if(!m_indexworkerthread.isRunning())
         return;
 
-    waitinfo.var = 0;
+    m_indexworkerthread.requestInterruption();
+
+    waitinfo.var = 1;
     waitinfo.mutex.lock();
     waitinfo.condvar.wakeOne();
     waitinfo.mutex.unlock();
 
     running = 0;
-
-    m_indexworkerthread.requestInterruption();
 
     m_indexworkerthread.quit();
     m_indexworkerthread.wait();
