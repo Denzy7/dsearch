@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(dsearch VERSION 0.0.1 LANGUAGES CXX)
+project(dsearch VERSION 0.0.2 LANGUAGES CXX)
 set(DSEARCH_VERSION "${dsearch_VERSION}")
 
 set(mingw_copylibs_DIR "${dsearch_SOURCE_DIR}/deps/mingw-copylibs")
@@ -13,14 +13,19 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DBus)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DBus)
+set(QtComponents Core Widgets DBus)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QtComponents})
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QtComponents})
 
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        db.h db.cpp
+        dbmodel.h dbmodel.cpp
+        indexer.h indexer.cpp
+        settings.h settings.cpp settings.ui
 )
 
 configure_file(dsearch_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/dsearch_config/dsearch_config.h)
@@ -44,10 +49,6 @@ else()
     else()
         add_executable(dsearch
             ${PROJECT_SOURCES}
-            db.h db.cpp
-            dbmodel.h dbmodel.cpp
-            indexer.h indexer.cpp
-            settings.h settings.cpp settings.ui
             ${CMAKE_CURRENT_BINARY_DIR}/dsearch_config/dsearch_config.h
         )
     endif()

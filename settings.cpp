@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QCheckBox>
+#include <qglobal.h>
 Settings::Settings(QWidget *parent, MainWindow* mainwindow)
     : QDialog(parent)
     , ui(new Ui::Settings)
@@ -15,7 +16,12 @@ Settings::Settings(QWidget *parent, MainWindow* mainwindow)
     ui->chkFileWatcher->setCheckState(
             mainwindow->fswatcher.directories().size() > 0 || mainwindow->fswatcher.directories().size() > 0 ?
             Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-    connect(ui->chkFileWatcher, &QCheckBox::stateChanged,
+    connect(ui->chkFileWatcher, 
+#if QT_VERSION > QT_VERSION_CHECK(6, 9, 0)
+            &QCheckBox::checkStateChanged,
+#else
+            &QCheckBox::stateChanged,
+#endif
             this, &Settings::OnFileWatcherChecked);
     ui->lblWatcherDirs->setText(QString("Directories: %1").arg(mainwindow->fswatcher.directories().size()));
     ui->lblWatcherFiles->setText(QString("Files: %1").arg(mainwindow->fswatcher.files().size()));
