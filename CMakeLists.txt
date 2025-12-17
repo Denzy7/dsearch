@@ -13,9 +13,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(QtComponents Core Widgets DBus)
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QtComponents})
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QtComponents})
+set(QtComponents Core Widgets)
+set(QtComponents_Optional DBus)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QtComponents} OPTIONAL_COMPONENTS ${QtComponents_Optional})
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QtComponents} OPTIONAL_COMPONENTS ${QtComponents_Optional})
 
 set(PROJECT_SOURCES
         main.cpp
@@ -40,7 +41,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
-    if(ANDROID)
+    if(ANDROID_NDK)
         add_library(dsearch SHARED
             ${PROJECT_SOURCES}
         )

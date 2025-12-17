@@ -3,21 +3,14 @@
 
 #include <QString>
 #include <vector>
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
 #include <QDirIterator>
+#include <QStatusBar>
+#include <QLabel>
+#include <QThread>
 #include "db.h"
 #include "dbmodel.h"
 
 namespace DSearch {
-
-struct WaitInfo
-{
-    QMutex mutex;
-    QWaitCondition condvar;
-    int var;
-};
 
 class Indexer : public QObject
 {
@@ -28,7 +21,9 @@ private:
 
 public:
     int running;
-    WaitInfo waitinfo;
+    QStatusBar* statusbar;
+    QLabel* items_statusbar;
+    DSearch::DbModel* model;
     std::vector<QString> paths;
     int Start(Db& db, QDirIterator::IteratorFlags iterflags);
     void Stop();

@@ -16,7 +16,7 @@ Settings::Settings(QWidget *parent, MainWindow* mainwindow)
     ui->chkFileWatcher->setCheckState(
             mainwindow->fswatcher.directories().size() > 0 || mainwindow->fswatcher.directories().size() > 0 ?
             Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-    connect(ui->chkFileWatcher, 
+    connect(ui->chkFileWatcher,
 #if QT_VERSION > QT_VERSION_CHECK(6, 9, 0)
             &QCheckBox::checkStateChanged,
 #else

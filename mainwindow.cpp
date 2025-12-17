@@ -49,11 +49,6 @@ MainWindow::MainWindow(QWidget *parent)
 /*    connect(&fswatcher, &QFileSystemWatcher::fileChanged,*/
             /*this, &MainWindow::onFileChanged);*/
 
-    connect(&m_mainindexer, &DSearch::Indexer::OnScan,
-            this, &MainWindow::indexone);
-    connect(&m_mainindexer, &DSearch::Indexer::OnIndexFinished,
-            this, &MainWindow::indexall);
-
     connect(ui->tblFiles, &QTableView::customContextMenuRequested,
             this, &MainWindow::onRMBtblFiles);
 
@@ -63,8 +58,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tblFiles->horizontalHeader()->setSectionsMovable(true);
 
     //m_indexer.paths.push_back(QDir::homePath());
-    m_mainindexer.paths.push_back(QDir::currentPath());
 
+    paths.push_back(QDir::currentPath());
     items_statusbar = new QLabel("Files: 0");
     ui->statusbar->addPermanentWidget(items_statusbar);
 
@@ -78,23 +73,16 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::indexone(DSearch::Indexer* indexer, DSearch::Db* db, DSearch::DbEntry* entry)
+void MainWindow::onIndexOne(DSearch::Indexer* indexer, DSearch::Db* db, DSearch::DbEntry* entry)
 {
     if(stopupdaterequested){
-        indexer->Stop();
         stopupdaterequested = 0;
+        onIndexAll(indexer, db);
         return;
     }
-    ui->statusbar->showMessage(entry->path);
-    dbmodel.AddEntryToModel(*entry);
-
-    indexer->waitinfo.var = 1;
-    indexer->waitinfo.mutex.lock();
-    indexer->waitinfo.condvar.wakeOne();
-    indexer->waitinfo.mutex.unlock();
 }
 
-void MainWindow::indexall(DSearch::Indexer* indexer, DSearch::Db* db)
+void MainWindow::onIndexAll(DSearch::Indexer* indexer, DSearch::Db* db)
 {
     ui->statusbar->showMessage("Adding paths to watcher...");
     std::vector<QString>::iterator it_qs;
@@ -106,7 +94,7 @@ void MainWindow::indexall(DSearch::Indexer* indexer, DSearch::Db* db)
         db->At(i, &ref);
         fswatcher.addPath(ref->path);
     }
-    for(it_qs = m_mainindexer.paths.begin(); it_qs != m_mainindexer.paths.end(); it_qs++)
+    for(it_qs = indexer->paths.begin(); it_qs != indexer->paths.end(); it_qs++)
     {
         fswatcher.addPath(*it_qs);
     }
@@ -114,8 +102,8 @@ void MainWindow::indexall(DSearch::Indexer* indexer, DSearch::Db* db)
     ui->actionStop_Update->setEnabled(false);
     ui->actionUpdate_Database->setEnabled(true);
 
-    items_statusbar->setText(QString("Files: %1").arg(ents->size()));
-    m_mainindexer.Stop();
+    indexer->Stop();
+    delete indexer;
 }
 
 void MainWindow::onDirectoryChanged(const QString &path)
@@ -127,12 +115,10 @@ void MainWindow::onDirectoryChanged(const QString &path)
         return;
     }
 
-    //TODO: memleak
     DSearch::Indexer* newpathindexer = new DSearch::Indexer;
     newpathindexer->paths.push_back(path);
+    setupIndexer(*newpathindexer);
     newpathindexer->Start(*db, QDirIterator::IteratorFlag::NoIteratorFlags);
-    connect(newpathindexer, &DSearch::Indexer::OnScan,
-            this, &MainWindow::indexone);
 }
 
 void MainWindow::onFileChanged(const QString &path)
@@ -143,7 +129,7 @@ void MainWindow::onFileChanged(const QString &path)
 void MainWindow::on_actionSettings_triggered()
 {
     Settings settings(this, this);
-    settings.paths = &m_mainindexer.paths;
+    settings.paths = &paths;
     settings.UpdatePathList();
     settings.exec();
 }
@@ -159,7 +145,13 @@ void MainWindow::on_actionUpdate_Database_triggered()
         fswatcher.removePaths(fswatcher.directories());
 
     ui->tblFiles->horizontalHeader()->resizeSections(QHeaderView::Stretch);
-    m_mainindexer.Start(*db, QDirIterator::IteratorFlag::Subdirectories);
+    DSearch::Indexer* indexer = new DSearch::Indexer;
+    for(std::vector<QString>::iterator it = paths.begin(); it != paths.end(); it++)
+    {
+        indexer->paths.push_back(*it);
+    }
+    setupIndexer(*indexer);
+    indexer->Start(*db, QDirIterator::IteratorFlag::Subdirectories);
 
     ui->actionStop_Update->setEnabled(true);
     ui->actionUpdate_Database->setEnabled(false);
@@ -209,7 +201,8 @@ void MainWindow::on_ledSearch_textChanged(const QString &arg1)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    m_mainindexer.Stop();
+    if(currentindexer)
+        currentindexer->Stop();
 }
 void MainWindow::on_actionCase_Sensitive_triggered(bool state)
 {
@@ -387,4 +380,14 @@ void MainWindow::changeEvent(QEvent *event)
     }
 
     QMainWindow::changeEvent(event);
+}
+void MainWindow::setupIndexer(DSearch::Indexer& indexer)
+{
+    indexer.statusbar = ui->statusbar;
+    indexer.model = &dbmodel;
+    indexer.items_statusbar = items_statusbar;
+    connect(&indexer, &DSearch::Indexer::OnScan,
+            this, &MainWindow::onIndexOne);
+    connect(&indexer, &DSearch::Indexer::OnIndexFinished,
+            this, &MainWindow::onIndexAll);
 }

@@ -65,17 +65,19 @@ private:
     Ui::MainWindow *ui;
     QLabel* items_statusbar;
 
-    DSearch::Indexer m_mainindexer;
     DSearch::Db* db;
+    std::vector<QString> paths;
     DSearch::DbModel dbmodel;
+    DSearch::Indexer* currentindexer = nullptr;
 
     SearchOptions searchopts;
     DSearch::DbEntry getMappedSelectedEntry();
     int stopupdaterequested = 0;
+    void setupIndexer(DSearch::Indexer& indexer);
 
 public slots:
-    void indexone(DSearch::Indexer* indexer, DSearch::Db* db, DSearch::DbEntry* entry);
-    void indexall(DSearch::Indexer* indexer, DSearch::Db* db);
+    void onIndexOne(DSearch::Indexer* indexer, DSearch::Db* db, DSearch::DbEntry* entry);
+    void onIndexAll(DSearch::Indexer* indexer, DSearch::Db* db);
 
     void onDirectoryChanged(const QString &path);
     void onFileChanged(const QString &path);
