@@ -18,16 +18,7 @@ set(QtComponents_Optional DBus)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QtComponents} OPTIONAL_COMPONENTS ${QtComponents_Optional})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QtComponents} OPTIONAL_COMPONENTS ${QtComponents_Optional})
 
-set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        db.h db.cpp
-        dbmodel.h dbmodel.cpp
-        indexer.h indexer.cpp
-        settings.h settings.cpp settings.ui
-)
+file(GLOB_RECURSE PROJECT_SOURCES src/*.h src/*.cpp src/*.ui)
 
 configure_file(dsearch_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/dsearch_config/dsearch_config.h)
 
