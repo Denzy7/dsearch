@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(dsearch VERSION 0.0.2 LANGUAGES CXX)
+project(dsearch VERSION 0.0.3 LANGUAGES CXX)
 set(DSEARCH_VERSION "${dsearch_VERSION}")
 
 set(mingw_copylibs_DIR "${dsearch_SOURCE_DIR}/deps/mingw-copylibs")
